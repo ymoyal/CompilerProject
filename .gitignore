@@ -1,0 +1,8 @@
+# Xojo specific 
+*.debug 
+Builds - * 
+*.obj 
+ 
+# OS specific 
+.DS_Store 
+Thumbs.db 
