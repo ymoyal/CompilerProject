@@ -68,45 +68,46 @@ Inherits ConsoleApplication
 
 	#tag Method, Flags = &h0
 		Function readFile(inputStream As TextInputStream, outStream As TextOutputStream, fileName As string) As void
+		  // Create the translator instance once
+		  Var writer As New CodeWriter(outStream)
+		  writer.setFileName(fileName)
+		  
 		  While Not inputStream.EndOfFile
 		    Var line As String = inputStream.ReadLine.Trim
 		    
-		    // 1. Handle Comments: Ignore everything after "//"
+		    // 1. Handle Comments, Ignore everything after "//"
 		    If line.Contains("//") Then
 		      line = line.Left(line.IndexOf("//")).Trim
 		    End If
 		    
-		    // 2. Skip empty lines
+		    // 2. Process Command
 		    If line <> "" Then
-		      // Split the line into individual words by space
 		      Var words() As String = line.Split(" ")
-		      Var command As String = words(0) // The first word is the VM command
+		      Var command As String = words(0)  // The first word is the VM command
 		      
 		      Select Case command
 		        
-		        // --- Arithmetic and Logical Commands ---
+		        // --- Arithmetic and Logical Commands ---      
+		        
 		      Case "add", "sub", "neg", "eq", "gt", "lt", "and", "or", "not"
 		        // Call a helper method to write the assembly code for arithmetic operations
-		        writeArithmetic(outStream, command)
+		        writer.writeArithmetic(command)
+		        
 		        
 		        // --- Memory Access Commands ---
+		        
 		      Case "push", "pop"
 		        // Ensure there are enough arguments for push/pop (segment and index)
 		        If words.LastIndex >= 2 Then
 		          Var segment As String = words(1)
 		          Var index As Integer = words(2).ToInteger
 		          // Call a helper method to write the assembly code for memory access
-		          writePushPop(outStream, command, segment, index, fileName)
+		          writer.writePushPop(command, segment, index)
 		        End If
-		        
-		        // --- Program Flow / Function Commands (Project 08) ---
-		      Case "label", "goto", "if-goto", "function", "call", "return"
-		        // These will be implemented in the next part of the project
 		        
 		      Else
 		        // Default: If the command is not recognized, skip it
 		      End Select
-		      
 		    End If
 		  Wend
 		End Function

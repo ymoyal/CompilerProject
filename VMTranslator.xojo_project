@@ -4,6 +4,7 @@ MinIDEVersion=20070100
 OrigIDEVersion=20250301
 Class=App;App.xojo_code;&h000000004BDD47FF;&h0000000000000000;false
 BuildSteps=Build Automation;Build Automation.xojo_code;&h0000000069C66FFF;&h0000000000000000;false
+Class=CodeWriter;CodeWriter.xojo_code;&h000000003ECA3FFF;&h0000000000000000;false
 MajorVersion=1
 MinorVersion=0
 SubVersion=0
