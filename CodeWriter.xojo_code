@@ -73,7 +73,6 @@ Protected Class CodeWriter
 		Sub writeArithmetic(command As String)
 		  // writeArithmetic: The main dispatcher for all arithmetic and logical operations.
 		  // This method is called by the Parser (readFile).
-		  Public Sub writeArithmetic(command As String)
 		  // Add a comment to the assembly file for easier debugging
 		  outStream.WriteLine("// arithmetic command: " + command)
 		  
@@ -113,50 +112,50 @@ Protected Class CodeWriter
 	#tag Method, Flags = &h21
 		Private Sub writeComparison(command as string)
 		  // writeComparison: Handles eq, gt, and lt using jumps and unique labels
-		  Private Sub writeComparison(command As String)
-		    Var jumpType As String
-		    
-		    // Determine which jump condition to use
-		    Select Case command
-		    Case "eq"
-		      jumpType = "JEQ" // Jump if x - y == 0
-		    Case "gt"
-		      jumpType = "JGT" // Jump if x - y > 0
-		    Case "lt"
-		      jumpType = "JLT" // Jump if x - y < 0
-		    End Select
-		    
-		    // 1. Get y in D, then point to x
-		    popToD()
-		    outStream.WriteLine("@SP")
-		    outStream.WriteLine("M=M-1")
-		    outStream.WriteLine("A=M")
-		    
-		    // 2. Calculate D = x - y
-		    outStream.WriteLine("D=M-D")
-		    
-		    // 3. Define unique labels for this specific comparison
-		    Var trueLabel As String = "IF_TRUE" + labelCounter.ToString
-		    Var nextLabel As String = "IF_NEXT" + labelCounter.ToString
-		    labelCounter = labelCounter + 1 // Increment for the next comparison
-		    
-		    // 4. If condition is met, jump to TRUE case
-		    outStream.WriteLine("@" + trueLabel)
-		    outStream.WriteLine("D;" + jumpType)
-		    
-		    // --- FALSE CASE ---
-		    outStream.WriteLine("D=0")      // Set D to False
-		    outStream.WriteLine("@" + nextLabel)
-		    outStream.WriteLine("0;JMP")    // Skip the true case
-		    
-		    // --- TRUE CASE ---
-		    outStream.WriteLine("(" + trueLabel + ")")
-		    outStream.WriteLine("D=-1")     // Set D to True (-1 in 16-bit is all 1s)
-		    
-		    // --- FINALIZE ---
-		    outStream.WriteLine("(" + nextLabel + ")")
-		    pushDToStack() // Push the result (0 or -1) back to the stack
-		    
+		  
+		  Var jumpType As String
+		  
+		  // Determine which jump condition to use
+		  Select Case command
+		  Case "eq"
+		    jumpType = "JEQ" // Jump if x - y == 0
+		  Case "gt"
+		    jumpType = "JGT" // Jump if x - y > 0
+		  Case "lt"
+		    jumpType = "JLT" // Jump if x - y < 0
+		  End Select
+		  
+		  // 1. Get y in D, then point to x
+		  popToD()
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("M=M-1")
+		  outStream.WriteLine("A=M")
+		  
+		  // 2. Calculate D = x - y
+		  outStream.WriteLine("D=M-D")
+		  
+		  // 3. Define unique labels for this specific comparison
+		  Var trueLabel As String = "IF_TRUE" + labelCounter.ToString
+		  Var nextLabel As String = "IF_NEXT" + labelCounter.ToString
+		  labelCounter = labelCounter + 1 // Increment for the next comparison
+		  
+		  // 4. If condition is met, jump to TRUE case
+		  outStream.WriteLine("@" + trueLabel)
+		  outStream.WriteLine("D;" + jumpType)
+		  
+		  // --- FALSE CASE ---
+		  outStream.WriteLine("D=0")      // Set D to False
+		  outStream.WriteLine("@" + nextLabel)
+		  outStream.WriteLine("0;JMP")    // Skip the true case
+		  
+		  // --- TRUE CASE ---
+		  outStream.WriteLine("(" + trueLabel + ")")
+		  outStream.WriteLine("D=-1")     // Set D to True (-1 in 16-bit is all 1s)
+		  
+		  // --- FINALIZE ---
+		  outStream.WriteLine("(" + nextLabel + ")")
+		  pushDToStack() // Push the result (0 or -1) back to the stack
+		  
 		End Sub
 	#tag EndMethod
 
@@ -202,13 +201,17 @@ Protected Class CodeWriter
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function writePopDynamic(segment As String, index As Integer) As sub
+		Private Sub writePopDynamic(segment As String, index As Integer)
 		  Var baseSymbol As String
 		  Select Case segment
-		  Case "local": baseSymbol = "LCL"
-		  Case "argument": baseSymbol = "ARG"
-		  Case "this": baseSymbol = "THIS"
-		  Case "that": baseSymbol = "THAT"
+		  Case "local"
+		     baseSymbol = "LCL"
+		  Case "argument"
+		     baseSymbol = "ARG"
+		  Case "this" 
+		      baseSymbol = "THIS"
+		  Case "that"
+		     baseSymbol = "THAT"
 		  End Select
 		  
 		  // Step 1: Calculate target address (Base + Index)
@@ -228,11 +231,11 @@ Protected Class CodeWriter
 		  outStream.WriteLine("@R13")
 		  outStream.WriteLine("A=M")
 		  outStream.WriteLine("M=D")
-		End Function
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function writePopFixed(segment As String, index As Integer) As sub
+		Private Sub writePopFixed(segment As String, index As Integer)
 		  Var baseAddress As Integer
 		  If segment = "temp" Then
 		    baseAddress = 5
@@ -244,20 +247,20 @@ Protected Class CodeWriter
 		  outStream.WriteLine("@" + Str(baseAddress + index))
 		  outStream.WriteLine("M=D")
 		  
-		End Function
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function writePopStatic(index As Integer) As sub
+		Private Sub writePopStatic(index As Integer)
 		  popToD() // Value is now in D
-		  outStream.WriteLine("@" + mFileName + "." + index.ToString)
+		  outStream.WriteLine("@" + fileName + "." + index.ToString)
 		  outStream.WriteLine("M=D")
 		  
-		End Function
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function writePushConstant(index As Integer) As Sub
+		Private Sub writePushConstant(index As Integer)
 		  // Stage 1: Load the constant value into the D register
 		  outStream.WriteLine("@" + index.ToString)
 		  outStream.WriteLine("D=A")
@@ -265,18 +268,22 @@ Protected Class CodeWriter
 		  // Stage 2: Push the value in D onto the stack
 		  pushDToStack()
 		  
-		End Function
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function writePushDynamic(segment As String, index As Integer) As sub
+		Private Sub writePushDynamic(segment As String, index As Integer)
 		  // Determine which base pointer to use
 		  Var baseSymbol As String
 		  Select Case segment
-		  Case "local": baseSymbol = "LCL"
-		  Case "argument": baseSymbol = "ARG"
-		  Case "this": baseSymbol = "THIS"
-		  Case "that": baseSymbol = "THAT"
+		  Case "local"
+		     baseSymbol = "LCL"
+		  Case "argument"
+		     baseSymbol = "ARG"
+		  Case "this"
+		     baseSymbol = "THIS"
+		  Case "that"
+		     baseSymbol = "THAT"
 		  End Select
 		  
 		  // Calculate address: RAM[baseSymbol] + index
@@ -288,11 +295,11 @@ Protected Class CodeWriter
 		  
 		  pushDToStack()
 		  
-		End Function
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function writePushFixed(segment As String, index As Integer) As sub
+		Private Sub writePushFixed(segment As String, index As Integer)
 		  Var baseAddress As Integer
 		  If segment = "temp" Then
 		    baseAddress = 5
@@ -305,11 +312,11 @@ Protected Class CodeWriter
 		  
 		  pushDToStack()
 		  
-		End Function
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function writePushPop(command As String, segment As String, index As Integer) As sub
+		Sub writePushPop(command As String, segment As String, index As Integer)
 		  // Add a comment to the output assembly file for debugging purposes
 		  outStream.WriteLine("// " + command + " " + segment + " " + index.ToString)
 		  
@@ -335,17 +342,17 @@ Protected Class CodeWriter
 		      writePopFixed(segment, index)
 		    End Select
 		  End If
-		End Function
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function writePushStatic(index As Integer) As sub
+		Private Sub writePushStatic(index As Integer)
 		  // Static segment uses the naming convention: FileName.Index
-		  outStream.WriteLine("@" + mFileName + "." + index.ToString)
+		  outStream.WriteLine("@" + fileName + "." + index.ToString)
 		  outStream.WriteLine("D=M")
 		  
 		  pushDToStack()
-		End Function
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h21

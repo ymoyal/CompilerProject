@@ -25,7 +25,7 @@ Inherits ConsoleApplication
 		    Return 1
 		  End If
 		  
-		  if mainDir.IsFolder Than
+		  if mainDir.IsFolder Then
 		    Var outputFile As FolderItem = mainDir.Child(mainDir.Name + ".asm")
 		    Var outStream As TextOutputStream = TextOutputStream.Create(outputFile)
 		    
@@ -67,7 +67,7 @@ Inherits ConsoleApplication
 
 
 	#tag Method, Flags = &h0
-		Function readFile(inputStream As TextInputStream, outStream As TextOutputStream, fileName As string) As void
+		Sub readFile(inputStream As TextInputStream, outStream As TextOutputStream, fileName As string)
 		  // Create the translator instance once
 		  Var writer As New CodeWriter(outStream)
 		  writer.setFileName(fileName)
@@ -110,7 +110,7 @@ Inherits ConsoleApplication
 		      End Select
 		    End If
 		  Wend
-		End Function
+		End Sub
 	#tag EndMethod
 
 
