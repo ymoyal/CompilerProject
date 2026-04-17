@@ -37,7 +37,6 @@ Protected Class CodeWriter
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-
 		Private Sub writeAdd()
 		  // Get the second number (y) from the stack into D
 		  popToD()
@@ -59,15 +58,13 @@ Protected Class CodeWriter
 	#tag Method, Flags = &h21
 		Private Sub writeAnd()
 		  // writeAnd: Bitwise AND (x & y)
-		  Private Sub writeAnd()
-		    popToD()
-		    outStream.WriteLine("@SP")
-		    outStream.WriteLine("M=M-1")
-		    outStream.WriteLine("A=M")
-		    outStream.WriteLine("M=M&D") // The bitwise AND operation
-		    outStream.WriteLine("@SP")
-		    outStream.WriteLine("M=M+1")
-		  End Sub
+		  popToD()
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("M=M-1")
+		  outStream.WriteLine("A=M")
+		  outStream.WriteLine("M=M&D") // The bitwise AND operation
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("M=M+1")
 		  
 		End Sub
 	#tag EndMethod
@@ -109,7 +106,7 @@ Protected Class CodeWriter
 		    // Optional: handle unknown commands if needed
 		  End Select
 		  
-		  End Sub
+		  
 		End Sub
 	#tag EndMethod
 
@@ -159,7 +156,7 @@ Protected Class CodeWriter
 		    // --- FINALIZE ---
 		    outStream.WriteLine("(" + nextLabel + ")")
 		    pushDToStack() // Push the result (0 or -1) back to the stack
-		  End Sub
+		    
 		End Sub
 	#tag EndMethod
 
@@ -179,14 +176,13 @@ Protected Class CodeWriter
 	#tag Method, Flags = &h21
 		Private Sub writeNot()
 		  // writeNot: Bitwise NOT (!x)
-		  Private Sub writeNot()
-		    outStream.WriteLine("@SP")
-		    outStream.WriteLine("M=M-1")
-		    outStream.WriteLine("A=M")
-		    outStream.WriteLine("M=!M") // The bitwise NOT operation
-		    outStream.WriteLine("@SP")
-		    outStream.WriteLine("M=M+1")
-		  End Sub
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("M=M-1")
+		  outStream.WriteLine("A=M")
+		  outStream.WriteLine("M=!M") // The bitwise NOT operation
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("M=M+1")
+		  
 		  
 		End Sub
 	#tag EndMethod
@@ -194,34 +190,14 @@ Protected Class CodeWriter
 	#tag Method, Flags = &h21
 		Private Sub writeOr()
 		  // writeOr: Bitwise OR (x | y)
-		  Private Sub writeOr()
-		    popToD()
-		    outStream.WriteLine("@SP")
-		    outStream.WriteLine("M=M-1")
-		    outStream.WriteLine("A=M")
-		    outStream.WriteLine("M=M|D") // The bitwise OR operation
-		    outStream.WriteLine("@SP")
-		    outStream.WriteLine("M=M+1")
-		  End Sub
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h21
-		Private Sub writeSub()
-		  // Get the second number (y) from the stack into D
 		  popToD()
-		  
-		  // Point to the first number (x) in the stack
 		  outStream.WriteLine("@SP")
 		  outStream.WriteLine("M=M-1")
 		  outStream.WriteLine("A=M")
-		  
-		  // Perform x - y (Note: D holds y, M holds x)
-		  outStream.WriteLine("M=M-D")
-		  
-		  // Move SP back to the next empty slot
+		  outStream.WriteLine("M=M|D") // The bitwise OR operation
 		  outStream.WriteLine("@SP")
 		  outStream.WriteLine("M=M+1")
+		  
 		End Sub
 	#tag EndMethod
 
@@ -252,7 +228,6 @@ Protected Class CodeWriter
 		  outStream.WriteLine("@R13")
 		  outStream.WriteLine("A=M")
 		  outStream.WriteLine("M=D")
-		  End Sub
 		End Function
 	#tag EndMethod
 
@@ -268,7 +243,7 @@ Protected Class CodeWriter
 		  popToD() // Value is now in D
 		  outStream.WriteLine("@" + Str(baseAddress + index))
 		  outStream.WriteLine("M=D")
-		  End Sub
+		  
 		End Function
 	#tag EndMethod
 
@@ -277,7 +252,7 @@ Protected Class CodeWriter
 		  popToD() // Value is now in D
 		  outStream.WriteLine("@" + mFileName + "." + index.ToString)
 		  outStream.WriteLine("M=D")
-		  End Sub
+		  
 		End Function
 	#tag EndMethod
 
@@ -289,7 +264,7 @@ Protected Class CodeWriter
 		  
 		  // Stage 2: Push the value in D onto the stack
 		  pushDToStack()
-		  End Sub
+		  
 		End Function
 	#tag EndMethod
 
@@ -312,7 +287,7 @@ Protected Class CodeWriter
 		  outStream.WriteLine("D=M")   // D = Value at address
 		  
 		  pushDToStack()
-		  End sub
+		  
 		End Function
 	#tag EndMethod
 
@@ -329,7 +304,7 @@ Protected Class CodeWriter
 		  outStream.WriteLine("D=M")
 		  
 		  pushDToStack()
-		  End Sub
+		  
 		End Function
 	#tag EndMethod
 
@@ -370,8 +345,26 @@ Protected Class CodeWriter
 		  outStream.WriteLine("D=M")
 		  
 		  pushDToStack()
-		  End Sub
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub writeSub()
+		  // Get the second number (y) from the stack into D
+		  popToD()
+		  
+		  // Point to the first number (x) in the stack
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("M=M-1")
+		  outStream.WriteLine("A=M")
+		  
+		  // Perform x - y (Note: D holds y, M holds x)
+		  outStream.WriteLine("M=M-D")
+		  
+		  // Move SP back to the next empty slot
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("M=M+1")
+		End Sub
 	#tag EndMethod
 
 

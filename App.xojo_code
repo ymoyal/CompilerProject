@@ -25,7 +25,7 @@ Inherits ConsoleApplication
 		    Return 1
 		  End If
 		  
-		  if mainDir.IsFolder
+		  if mainDir.IsFolder Than
 		    Var outputFile As FolderItem = mainDir.Child(mainDir.Name + ".asm")
 		    Var outStream As TextOutputStream = TextOutputStream.Create(outputFile)
 		    
@@ -46,12 +46,12 @@ Inherits ConsoleApplication
 		    Next
 		    outStream.Close
 		    
-		  elseIf mainDir.Name.Right(3) = ".vm"
+		  elseIf mainDir.Name.Right(3) = ".vm" Then
 		    var outputName As String = mainDir.Name.Replace(".vm", ".asm")
 		    var outputFile As FolderItem = mainDir.Parent.Child(outputName)
 		    Var outStream As TextOutputStream = TextOutputStream.Create(outputFile)
 		    Var inputStream As TextInputStream = TextInputStream.Open(mainDir)
-		    readFile(inputStream, outStream, mainDir.Name.Left(Name.Length - 3)) 
+		    readFile(inputStream, outStream, mainDir.Name.Left(mainDir.Name.Length - 3)) 
 		    outStream.Close
 		    inputStream.Close
 		  else

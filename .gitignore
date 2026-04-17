@@ -1,8 +1,10 @@
-# Xojo specific 
-*.debug 
-Builds - * *.obj 
+# Xojo specific
+Builds\ -*/
+Builds\ -\ VMTranslator/
+*.debug
+*.obj
 *.xojo_uistate
 
-# OS specific 
-.DS_Store 
+# OS specific
+.DS_Store
 Thumbs.db
