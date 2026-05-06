@@ -135,6 +135,63 @@ Protected Class CodeWriter
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Sub writeCall(functionName As String, numArgs As Integer)
+		  // Define a static variable that persists across calls
+		  Static returnLabelIndex As Integer = 0
+		  
+		  // Generate a unique return label for this specific call instance
+		  Var returnLabel As String = functionName + "$ret." + returnLabelIndex.ToString
+		  returnLabelIndex = returnLabelIndex + 1
+		  
+		  // 1. Push return-address label onto the stack
+		  outStream.WriteLine("@" + returnLabel)
+		  outStream.WriteLine("D=A")
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("A=M")
+		  outStream.WriteLine("M=D")
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("M=M+1")
+		  
+		  // 2-5. Push LCL, ARG, THIS, and THAT registers onto the stack
+		  Dim registers() As String = Array("LCL", "ARG", "THIS", "THAT")
+		  
+		  For Each reg As String In registers
+		    outStream.WriteLine("@" + reg)
+		    outStream.WriteLine("D=M")
+		    outStream.WriteLine("@SP")
+		    outStream.WriteLine("A=M")
+		    outStream.WriteLine("M=D")
+		    outStream.WriteLine("@SP")
+		    outStream.WriteLine("M=M+1")
+		  Next
+		  
+		  // 6. Reposition ARG: ARG = SP - 5 - nArgs
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@5")
+		  outStream.WriteLine("D=D-A")
+		  outStream.WriteLine("@" + numArgs.ToString)
+		  outStream.WriteLine("D=D-A")
+		  outStream.WriteLine("@ARG")
+		  outStream.WriteLine("M=D")
+		  
+		  // 7. Reposition LCL: LCL = SP
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@LCL")
+		  outStream.WriteLine("M=M+1") // סליחה, כאן שמרנו את ה-LCL: צריך להיות M=D
+		  outStream.WriteLine("M=D") // תיקון: LCL = SP (השורה הזו היא המעודכנת)
+		  
+		  // 8. Transfer control to the called function
+		  outStream.WriteLine("@" + functionName)
+		  outStream.WriteLine("0;JMP")
+		  
+		  // 9. Declare the return address label
+		  outStream.WriteLine("(" + returnLabel + ")")
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h21
 		Private Sub writeComparison(command as string)
 		  // writeComparison: Handles eq, gt, and lt using jumps and unique labels
@@ -182,6 +239,22 @@ Protected Class CodeWriter
 		  outStream.WriteLine("(" + nextLabel + ")")
 		  pushDToStack() // Push the result (0 or -1) back to the stack
 		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub writeFunction(functionName As String, numVars As Integer)
+		  // 1. Write the function label
+		  outStream.WriteLine("(" + functionName + ")")
+		  
+		  // 2. Initialize the local variables to 0
+		  For i As Integer = 1 To numVars
+		    outStream.WriteLine("@SP")
+		    outStream.WriteLine("A=M")
+		    outStream.WriteLine("M=0")
+		    outStream.WriteLine("@SP")
+		    outStream.WriteLine("M=M+1")
+		  Next
 		End Sub
 	#tag EndMethod
 
@@ -378,6 +451,76 @@ Protected Class CodeWriter
 		  outStream.WriteLine("D=M")
 		  
 		  pushDToStack()
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub writeReturn()
+		  // 1. FRAME = LCL
+		  outStream.WriteLine("@LCL")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@R13")
+		  outStream.WriteLine("M=D")
+		  
+		  // 2. RET = *(FRAME - 5)
+		  outStream.WriteLine("@5")
+		  outStream.WriteLine("A=D-A")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@R14")
+		  outStream.WriteLine("M=D")
+		  
+		  // 3. *ARG = pop()
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("A=M-1")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@ARG")
+		  outStream.WriteLine("A=M")
+		  outStream.WriteLine("M=D")
+		  
+		  // 4. SP = ARG + 1
+		  outStream.WriteLine("@ARG")
+		  outStream.WriteLine("D=M+1")
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("M=D")
+		  
+		  // 5. THAT = *(FRAME - 1)
+		  outStream.WriteLine("@R13")
+		  outStream.WriteLine("A=M-1")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@THAT")
+		  outStream.WriteLine("M=D")
+		  
+		  // 6. THIS = *(FRAME - 2)
+		  outStream.WriteLine("@R13")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@2")
+		  outStream.WriteLine("A=D-A")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@THIS")
+		  outStream.WriteLine("M=D")
+		  
+		  // 7. ARG = *(FRAME - 3)
+		  outStream.WriteLine("@R13")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@3")
+		  outStream.WriteLine("A=D-A")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@ARG")
+		  outStream.WriteLine("M=D")
+		  
+		  // 8. LCL = *(FRAME - 4)
+		  outStream.WriteLine("@R13")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@4")
+		  outStream.WriteLine("A=D-A")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@LCL")
+		  outStream.WriteLine("M=D")
+		  
+		  // 9. goto RET
+		  outStream.WriteLine("@R14")
+		  outStream.WriteLine("A=M")
+		  outStream.WriteLine("0;JMP")
 		End Sub
 	#tag EndMethod
 

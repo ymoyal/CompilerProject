@@ -105,6 +105,26 @@ Inherits ConsoleApplication
 		          writer.writePushPop(command, segment, index)
 		        End If
 		        
+		        
+		        // --- Program Control Commands ---
+		      Case "function"
+		        If words.LastIndex >= 2 Then
+		          Var functionName As String = words(1)
+		          Var numVars As Integer = words(2).ToInteger
+		          writer.writeFunction(functionName, numVars)
+		        End If
+		        
+		      Case "return"
+		        writer.writeReturn()
+		        
+		      Case "call"
+		        If words.LastIndex >= 2 Then
+		          Var functionName As String = words(1)
+		          Var numArgs As Integer = words(2).ToInteger
+		          writer.writeCall(functionName, numArgs)
+		        End If
+		        
+		        
 		      Else
 		        // Default: If the command is not recognized, skip it
 		      End Select
