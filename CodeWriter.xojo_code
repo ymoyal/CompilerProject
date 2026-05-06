@@ -20,12 +20,35 @@ Protected Class CodeWriter
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
+		Private Sub popToR(register As String)
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("AM=M-1")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@" + register)
+		  outStream.WriteLine("M=D")
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
 		Private Sub pushDToStack()
 		  outStream.WriteLine("@SP")
 		  outStream.WriteLine("A=M")
 		  outStream.WriteLine("M=D")
 		  outStream.WriteLine("@SP")
 		  outStream.WriteLine("M=M+1")
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub pushFromR(register As String)
+		  outStream.WriteLine("@" + register)
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("A=M")
+		  outStream.WriteLine("M=D")
+		  outStream.WriteLine("@SP")
+		  outStream.WriteLine("M=M+1")
+		  
 		End Sub
 	#tag EndMethod
 
@@ -100,6 +123,9 @@ Protected Class CodeWriter
 		    
 		  Case "not"
 		    writeNot()
+		    
+		  Case "shl"
+		    writeShl()
 		    
 		  Else
 		    // Optional: handle unknown commands if needed
@@ -205,13 +231,13 @@ Protected Class CodeWriter
 		  Var baseSymbol As String
 		  Select Case segment
 		  Case "local"
-		     baseSymbol = "LCL"
+		    baseSymbol = "LCL"
 		  Case "argument"
-		     baseSymbol = "ARG"
+		    baseSymbol = "ARG"
 		  Case "this" 
-		      baseSymbol = "THIS"
+		    baseSymbol = "THIS"
 		  Case "that"
-		     baseSymbol = "THAT"
+		    baseSymbol = "THAT"
 		  End Select
 		  
 		  // Step 1: Calculate target address (Base + Index)
@@ -277,13 +303,13 @@ Protected Class CodeWriter
 		  Var baseSymbol As String
 		  Select Case segment
 		  Case "local"
-		     baseSymbol = "LCL"
+		    baseSymbol = "LCL"
 		  Case "argument"
-		     baseSymbol = "ARG"
+		    baseSymbol = "ARG"
 		  Case "this"
-		     baseSymbol = "THIS"
+		    baseSymbol = "THIS"
 		  Case "that"
-		     baseSymbol = "THAT"
+		    baseSymbol = "THAT"
 		  End Select
 		  
 		  // Calculate address: RAM[baseSymbol] + index
@@ -352,6 +378,43 @@ Protected Class CodeWriter
 		  outStream.WriteLine("D=M")
 		  
 		  pushDToStack()
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub writeShl()
+		  Var labelId As String = labelCounter.ToString
+		  labelCounter = labelCounter + 1
+		  
+		  // Pop parameters: x (steps) into R13, y (value) into R14 [cite: 106]
+		  popToR("R13") 
+		  popToR("R14") 
+		  
+		  // Start of the shift loop
+		  outStream.WriteLine("(SHIFT_LEFT_LOOP_" + labelId + ")")
+		  
+		  // Check if all steps are completed (x == 0)
+		  outStream.WriteLine("@R13")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("@SHIFT_LEFT_END_" + labelId)
+		  outStream.WriteLine("D;JEQ")
+		  
+		  // Perform y = y * 2 (equivalent to shifting left by 1)
+		  outStream.WriteLine("@R14")
+		  outStream.WriteLine("D=M")
+		  outStream.WriteLine("M=D+M")
+		  
+		  // Decrement step counter: x = x - 1
+		  outStream.WriteLine("@R13")
+		  outStream.WriteLine("M=M-1")
+		  
+		  // Repeat loop
+		  outStream.WriteLine("@SHIFT_LEFT_LOOP_" + labelId)
+		  outStream.WriteLine("0;JMP")
+		  
+		  // End of loop, push the result (y << x) back to the stack [cite: 107]
+		  outStream.WriteLine("(SHIFT_LEFT_END_" + labelId + ")")
+		  pushFromR("R14")
 		End Sub
 	#tag EndMethod
 

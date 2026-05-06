@@ -89,7 +89,7 @@ Inherits ConsoleApplication
 		        
 		        // --- Arithmetic and Logical Commands ---      
 		        
-		      Case "add", "sub", "neg", "eq", "gt", "lt", "and", "or", "not"
+		      Case "add", "sub", "neg", "eq", "gt", "lt", "and", "or", "not","shl"
 		        // Call a helper method to write the assembly code for arithmetic operations
 		        writer.writeArithmetic(command)
 		        
