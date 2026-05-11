@@ -127,6 +127,7 @@ Protected Class CodeWriter
 		  Case "shl"
 		    writeShl()
 		    
+		    
 		  Else
 		    // Optional: handle unknown commands if needed
 		  End Select
@@ -182,6 +183,43 @@ Protected Class CodeWriter
 		  outStream.WriteLine("(" + nextLabel + ")")
 		  pushDToStack() // Push the result (0 or -1) back to the stack
 		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub writeGoTo(label As String)
+		  // Load the address of the label into the A register.
+		  // We use the same 'fileName.label' format to match the declaration.
+		  self.outStream.WriteLine("@" + self.fileName + "." + label)
+		  
+		  // Execute an unconditional jump (JMP).
+		  // This tells the computer to continue execution from the label's address.
+		  self.outStream.WriteLine("0;JMP")
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub writeIfGoTo(label As String)
+		  // 1. Pop the top element of the stack into the D register.
+		  // We use the helper method you already have in your CodeWriter.
+		  self.popToD()
+		  
+		  // 2. Load the target label address into the A register.
+		  self.outStream.WriteLine("@" + self.fileName + "." + label)
+		  
+		  // 3. Conditional jump: Jump to the label if D is not zero (true).
+		  // In VM, 0 is false and non-zero (usually -1) is true.
+		  self.outStream.WriteLine("D;JNE")
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub writeLabel(label As String)
+		  // Construct the ASM label string in the format: (FileName.label)
+		  Dim asmLine As String = "(" + self.fileName + "." + label + ")"      
+		  
+		  // Write the label declaration to the output assembly file.
+		  self.outStream.WriteLine(asmLine)
 		End Sub
 	#tag EndMethod
 
