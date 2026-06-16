@@ -1,6 +1,9 @@
 # Xojo specific
-Builds\ -*/
-Builds\ -\ VMTranslator/
+**/Builds\ -*/
+**/Builds\ -\ VMTranslator/
+*Build*/
+*build*/
+*BUILD*/
 *.debug
 *.obj
 *.xojo_uistate
